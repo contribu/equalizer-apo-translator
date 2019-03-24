@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: magj/go-ui-crossbuild
+    working_directory: /go/src/github.com/contribu/equalizer-apo-translator
+    steps:
+      - checkout
+      - run: pacman -Sy && pacman -S --noconfirm core/icu core/binutils qt5-base qt5-tools glibc extra/wget core/gnutls core/nettle
+      - run: echo https://superuser.com/questions/1347723/arch-on-wsl-libqt5core-so-5-not-found-despite-being-installed
+      - run: strip --remove-section=.note.ABI-tag /usr/lib64/libQt5Core.so.5
+      - run: sudo chmod -R 777 /go
+      - run: go env
+      - run: mkdir -p /tmp/results
+      - run: go get -u github.com/jteeuwen/go-bindata/...
+      - run: dep ensure
+      - run:
+          name: build
+          command: |
+            wget -O translations/qtbase_ja.ts https://raw.githubusercontent.com/gTakes/qt-ifw-translation-ja/master/translations/qt5/qtbase_ja.ts
+            wget -O data/qtbase_de.qm https://sourceforge.net/p/equalizerapo/code/HEAD/tree/trunk/Editor/translations/qtbase_de.qm?format=raw
+            wget -O data/Editor_de.qm https://sourceforge.net/p/equalizerapo/code/HEAD/tree/trunk/Editor/translations/Editor_de.qm?format=raw
+            lrelease translations/qtbase_ja.ts -qm data/qtbase_ja.qm
+            lrelease translations/Editor_ja.ts -qm data/Editor_ja.qm
+            go-bindata data/
+
+            gouicrossbuild /go/src/github.com/contribu ./equalizer-apo-translator /tmp/results
+      - store_artifacts:
+          path: /tmp/results
+          destination: results
