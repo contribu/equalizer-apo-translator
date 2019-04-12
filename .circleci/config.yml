@@ -6,7 +6,7 @@ jobs:
     working_directory: /go/src/github.com/contribu/equalizer-apo-translator
     steps:
       - checkout
-      - run: pacman -Sy && pacman -S --noconfirm core/icu core/binutils qt5-base qt5-tools glibc extra/wget core/gnutls core/nettle
+      - run: pacman -Sy && pacman -S --noconfirm core/icu core/binutils qt5-base qt5-tools glibc curl openssl core/gnutls core/nettle
       - run: echo https://superuser.com/questions/1347723/arch-on-wsl-libqt5core-so-5-not-found-despite-being-installed
       - run: strip --remove-section=.note.ABI-tag /usr/lib64/libQt5Core.so.5
       - run: sudo chmod -R 777 /go
@@ -17,9 +17,9 @@ jobs:
       - run:
           name: build
           command: |
-            wget -O translations/qtbase_ja.ts https://raw.githubusercontent.com/gTakes/qt-ifw-translation-ja/master/translations/qt5/qtbase_ja.ts
-            wget -O data/qtbase_de.qm https://sourceforge.net/p/equalizerapo/code/HEAD/tree/trunk/Editor/translations/qtbase_de.qm?format=raw
-            wget -O data/Editor_de.qm https://sourceforge.net/p/equalizerapo/code/HEAD/tree/trunk/Editor/translations/Editor_de.qm?format=raw
+            curl -L https://raw.githubusercontent.com/gTakes/qt-ifw-translation-ja/master/translations/qt5/qtbase_ja.ts > translations/qtbase_ja.ts
+            curl -L https://sourceforge.net/p/equalizerapo/code/HEAD/tree/trunk/Editor/translations/qtbase_de.qm?format=raw > data/qtbase_de.qm
+            curl -L https://sourceforge.net/p/equalizerapo/code/HEAD/tree/trunk/Editor/translations/Editor_de.qm?format=raw > data/Editor_de.qm
             lrelease translations/qtbase_ja.ts -qm data/qtbase_ja.qm
             lrelease translations/Editor_ja.ts -qm data/Editor_ja.qm
             go-bindata data/
