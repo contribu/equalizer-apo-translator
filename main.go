@@ -10,6 +10,7 @@ import (
 import _ "github.com/andlabs/ui/winmanifest"
 
 var mainwin *ui.Window
+var appDirectoryEntry *ui.Entry
 
 func convNewline(str, nlcode string) string {
 	return strings.NewReplacer(
@@ -31,17 +32,22 @@ func exists(path string) (bool) {
 }
 
 func findApoDirectories() ([]string) {
-	result := []string{}
+	result := map[string]int{}
 	paths := []string{
 		"C:\\Program Files\\EqualizerAPO",
 		"C:\\Program Files (x86)\\EqualizerAPO",
+		appDirectoryEntry.Text(),
 	}
 	for _, v := range paths {
 		if exists(v) {
-			result = append(result, v)
+			result[v] = 1
 		}
 	}
-	return result
+	keys := []string{}
+	for key := range result {
+		keys = append(keys, key)
+	}
+	return keys
 }
 
 func translationDirPath(rootDir string) (string) {
@@ -159,6 +165,13 @@ func setupUI() {
 
 	vbox := ui.NewVerticalBox()
 	vbox.SetPadded(true)
+
+	appDirectoryLabel := ui.NewLabel("Equalizer APOをインストールしたディレクトリ(デフォルトの場合は変更不要)")
+	vbox.Append(appDirectoryLabel, false)
+
+	appDirectoryEntry = ui.NewEntry()
+	appDirectoryEntry.SetText("C:\\Program Files\\EqualizerAPO")
+	vbox.Append(appDirectoryEntry, false)
 
 	applyJapaneseButton := ui.NewButton("日本語化を適用する")
 	applyJapaneseButton.OnClicked(func(*ui.Button) {
